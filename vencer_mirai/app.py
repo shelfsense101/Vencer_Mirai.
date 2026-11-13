@@ -198,17 +198,121 @@ def set_language():
     return redirect(request.referrer or url_for('home'))
 
 # ---------- Core inventory and sales ----------
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    db=db_conn(); products=db.execute('SELECT * FROM store_products WHERE store_id=? ORDER BY id DESC',(sid(),)).fetchall()
-    enriched=[]
+    db = db_conn()
+
+    # Get the actual user record from the database
+    user = db.execute(
+        'SELECT id, store_id, name FROM users WHERE id=?',
+        (session.get('user_id'),)
+    ).fetchone()
+
+    if not user:
+        session.clear()
+        flash('Please log in again.', 'error')
+        return redirect(url_for('login'))
+
+    store_id = user['store_id']
+
+    # Check whether the user's store exists
+    store = db.execute(
+        'SELECT * FROM stores WHERE id=?',
+        (store_id,)
+    ).fetchone()
+
+    # Recover a missing store record without changing its ID.
+    # This helps preserve existing inventory linked to that ID.
+    if not store:
+        store_name = session.get('store_name') or (user['name'] + "'s Store")
+
+        db.execute(
+            'INSERT INTO stores (id, name) VALUES (?, ?)',
+            (store_id, store_name)
+        )
+        db.commit()
+
+        store = db.execute(
+            'SELECT * FROM stores WHERE id=?',
+            (store_id,)
+        ).fetchone()
+
+    # Refresh the session using the database record
+    session['store_id'] = store_id
+    session['store_name'] = store['name']
+    session['user_name'] = user['name']
+
+    products = db.execute(
+        'SELECT * FROM store_products WHERE store_id=? ORDER BY id DESC',
+        (store_id,)
+    ).fetchall()
+
+    enriched = []
+
     for p in products:
-        d=dict(p); d['status'],d['days_left']=product_status(p); d['suggested_discount']=min(40, max(5, 10 + (7-(d['days_left'] or 7))*4)) if d['days_left'] is not None and d['days_left']>=0 else 0; enriched.append(d)
-    sales=db.execute('SELECT COUNT(*) transactions, COALESCE(SUM(revenue),0) revenue FROM sales WHERE store_id=?',(sid(),)).fetchone()
-    metrics={'product_count':len(products),'units':sum(int(p['quantity'] or 0) for p in products),'soon':sum(1 for p in enriched if p['days_left'] is not None and 0<=p['days_left']<=7),'expired':sum(1 for p in enriched if p['days_left'] is not None and p['days_left']<0),'stock_cost':sum(int(p['quantity'] or 0)*float(p['cost_price'] or 0) for p in products),'revenue':sales['revenue'],'transactions':sales['transactions'],'recovered':db.execute('SELECT COALESCE(SUM(unit_cost*quantity),0) FROM sales WHERE store_id=?',(sid(),)).fetchone()[0],'expired_loss':sum(int(p['quantity'] or 0)*float(p['cost_price'] or 0) for p in enriched if p['days_left'] is not None and p['days_left']<0)}
-    new_arrivals = sorted([dict(p) for p in products if p['stocked_on']], key=lambda x: x['stocked_on'], reverse=True)[:5]
-    return render_template('dashboard.html', products=enriched, new_arrivals=new_arrivals, metrics=metrics, store_name=current_store()['name'], today=date.today().isoformat())
+        d = dict(p)
+        d['status'], d['days_left'] = product_status(p)
+
+        d['suggested_discount'] = (
+            min(40, max(5, 10 + (7 - (d['days_left'] or 7)) * 4))
+            if d['days_left'] is not None and d['days_left'] >= 0
+            else 0
+        )
+
+        enriched.append(d)
+
+    sales = db.execute(
+        'SELECT COUNT(*) transactions, COALESCE(SUM(revenue),0) revenue '
+        'FROM sales WHERE store_id=?',
+        (store_id,)
+    ).fetchone()
+
+    metrics = {
+        'product_count': len(products),
+        'units': sum(int(p['quantity'] or 0) for p in products),
+        'soon': sum(
+            1 for p in enriched
+            if p['days_left'] is not None and 0 <= p['days_left'] <= 7
+        ),
+        'expired': sum(
+            1 for p in enriched
+            if p['days_left'] is not None and p['days_left'] < 0
+        ),
+        'stock_cost': sum(
+            int(p['quantity'] or 0) * float(p['cost_price'] or 0)
+            for p in products
+        ),
+        'revenue': sales['revenue'],
+        'transactions': sales['transactions'],
+        'recovered': db.execute(
+            'SELECT COALESCE(SUM(unit_cost*quantity),0) '
+            'FROM sales WHERE store_id=?',
+            (store_id,)
+        ).fetchone()[0],
+        'expired_loss': sum(
+            int(p['quantity'] or 0) * float(p['cost_price'] or 0)
+            for p in enriched
+            if p['days_left'] is not None and p['days_left'] < 0
+        )
+    }
+
+    new_arrivals = sorted(
+        [dict(p) for p in products if p['stocked_on']],
+        key=lambda x: x['stocked_on'],
+        reverse=True
+    )[:5]
+
+    return render_template(
+        'dashboard.html',
+        products=enriched,
+        new_arrivals=new_arrivals,
+        metrics=metrics,
+        store_name=store['name'],
+        today=date.today().isoformat()
+    )
+
 
 @app.route('/products/add', methods=['POST'])
 @login_required
