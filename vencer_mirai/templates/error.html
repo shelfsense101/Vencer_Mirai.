@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block heading %}{{ t('error') }}{% endblock %}{% block content %}<section class="panel"><p>{{ message }}</p><a class="btn" href="{{ url_for('home') }}">{{ t('home') }}</a></section>{% endblock %}
