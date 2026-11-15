@@ -1,1 +1,117 @@
-{% extends 'base.html' %}{% block title %}{{ t('brand') }} | {{ t('tagline') }}{% endblock %}{% block content %}<section class="hero"><p class="eyebrow">{{ t('tagline') }}</p><h2>{{ t('home_headline') }}</h2><p>{{ t('home_subtitle') }}</p><div class="actions"><a class="btn primary" href="{{ url_for('register') }}">{{ t('get_started') }}</a><a class="btn secondary" href="{{ url_for('login') }}">{{ t('login') }}</a></div></section><section class="grid-cards"><article class="card"><h3>{{ t('inventory') }}</h3><p>Track products, quantities, categories, barcodes and stock thresholds.</p></article><article class="card"><h3>{{ t('expiry_offers') }}</h3><p>Monitor expiry dates and review suggested markdowns before recording sales.</p></article><article class="card"><h3>{{ t('planner') }}</h3><p>Estimate reorder quantities from your recorded sales pace and stock levels.</p></article><article class="card"><h3>{{ t('suppliers') }}</h3><p>Compare shop-entered supplier quotations, minimum orders and delivery charges.</p></article><article class="card"><h3>{{ t('reports') }}</h3><p>Review revenue, estimated gross profit, top sellers and recorded wastage.</p></article><article class="card"><h3>{{ t('advisor') }}</h3><p>Get transparent business suggestions based on your own store data.</p></article></section><p class="note">{{ t('estimate_disclaimer') }}</p>{% endblock %}
+ {% extends 'base.html' %}
+
+{% block title %}{{ t('brand') }} | {{ t('tagline') }}{% endblock %}
+
+{% block content %}
+
+<section class="vm-hero">
+    <div class="vm-hero-content">
+        <span class="vm-eyebrow">{{ t('tagline') }}</span>
+
+        <h1>{{ t('home_headline') }}</h1>
+
+        <p>{{ t('home_subtitle') }}</p>
+
+        <div class="vm-actions">
+            <a class="vm-btn vm-primary" href="{{ url_for('register') }}">
+                {{ t('get_started') }} →
+            </a>
+            <a class="vm-btn vm-secondary" href="{{ url_for('login') }}">
+                {{ t('login') }}
+            </a>
+        </div>
+
+        <div class="vm-trust">
+            Smarter inventory. Better decisions. Stronger businesses.
+        </div>
+    </div>
+
+    <div class="vm-hero-visual">
+        <div class="vm-visual-card">
+            <span class="vm-visual-label">YOUR BUSINESS, SIMPLIFIED</span>
+            <div class="vm-visual-icon">✳</div>
+            <h3>Everything in one place.</h3>
+            <p>Inventory, insights and business planning brought together.</p>
+            <div class="vm-visual-lines">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="vm-intro">
+    <span class="vm-eyebrow">BUILT FOR SMALL RETAILERS</span>
+    <h2>Running a shop is complicated.<br>Managing it shouldn't be.</h2>
+    <p>From monitoring inventory to understanding sales, Vencer Mirai brings essential retail tools together in one accessible platform.</p>
+</section>
+
+<section class="vm-features">
+    <div class="vm-section-heading">
+        <div>
+            <span class="vm-eyebrow">WHAT WE OFFER</span>
+            <h2>Tools that work smarter.</h2>
+        </div>
+        <p>Everything you need to stay organised and make informed business decisions.</p>
+    </div>
+
+    <div class="vm-feature-grid">
+
+        <article class="vm-feature-card">
+            <span class="vm-feature-number">01</span>
+            <div class="vm-feature-icon">▤</div>
+            <h3>{{ t('inventory') }}</h3>
+            <p>Track products, quantities, categories, barcodes and stock thresholds.</p>
+        </article>
+
+        <article class="vm-feature-card">
+            <span class="vm-feature-number">02</span>
+            <div class="vm-feature-icon">◷</div>
+            <h3>{{ t('expiry_offers') }}</h3>
+            <p>Monitor expiry dates and review suggested markdowns before recording sales.</p>
+        </article>
+
+        <article class="vm-feature-card">
+            <span class="vm-feature-number">03</span>
+            <div class="vm-feature-icon">↗</div>
+            <h3>{{ t('planner') }}</h3>
+            <p>Estimate reorder quantities from your recorded sales pace and stock levels.</p>
+        </article>
+
+        <article class="vm-feature-card">
+            <span class="vm-feature-number">04</span>
+            <div class="vm-feature-icon">⇄</div>
+            <h3>{{ t('suppliers') }}</h3>
+            <p>Compare supplier quotations, minimum orders and delivery charges.</p>
+        </article>
+
+        <article class="vm-feature-card">
+            <span class="vm-feature-number">05</span>
+            <div class="vm-feature-icon">▥</div>
+            <h3>{{ t('reports') }}</h3>
+            <p>Review revenue, estimated gross profit, top sellers and recorded wastage.</p>
+        </article>
+
+        <article class="vm-feature-card">
+            <span class="vm-feature-number">06</span>
+            <div class="vm-feature-icon">✳</div>
+            <h3>{{ t('advisor') }}</h3>
+            <p>Get transparent business suggestions based on your own store data.</p>
+        </article>
+
+    </div>
+</section>
+
+<section class="vm-impact">
+    <span class="vm-eyebrow">THE BIGGER PICTURE</span>
+    <h2>Small businesses deserve<br>smarter technology.</h2>
+    <p>We believe useful business insights shouldn't be limited to large retail chains. Vencer Mirai aims to make smarter retail management accessible to everyone.</p>
+    <a href="{{ url_for('register') }}" class="vm-btn vm-light">Get started →</a>
+</section>
+
+<section class="vm-disclaimer">
+    <p>{{ t('estimate_disclaimer') }}</p>
+</section>
+
+{% endblock %}
